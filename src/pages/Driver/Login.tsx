@@ -16,9 +16,9 @@ function LogIn() {
       <div className="flex h-screen justify-center items-center bg-gray-800">
         <Card className="w-full max-w-sm">
           <CardHeader>
-            <CardTitle>Create new account</CardTitle>
+            <CardTitle>Login into your account</CardTitle>
             <CardDescription>
-              Enter your details below to create a new account
+              Enter your Email and password account to log back in.
             </CardDescription>
             <CardAction>
               <Button variant="link">Sign In</Button>
@@ -27,15 +27,7 @@ function LogIn() {
           <CardContent>
             <form>
               <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="m@example.com"
-                    required
-                  />
-                </div>
+               
 
                 <div className="grid gap-2">
                   <Label htmlFor="email">Email</Label>
