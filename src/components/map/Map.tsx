@@ -1,85 +1,78 @@
-import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
-import { useEffect, useMemo, useRef, useState } from "react";
-import "leaflet/dist/leaflet.css";
+import { useEffect, useRef, useState } from "react";
+// import useGetUserLiveLocation from "@/hooks/useGetUserLiveLocation";
+
+import "mapbox-gl/dist/mapbox-gl.css";
+import mapboxgl from "mapbox-gl";
+
+import { MAPBOX_ACCESS_TOKEN } from "@/global/env";
 import useGetUserLiveLocation from "@/hooks/useGetUserLiveLocation";
-import type { Marker as LeafletMarker } from "leaflet";
-
-function RecenterMap({ center }: { center: [number, number] }) {
-  const map = useMap();
-
-  useEffect(() => {
-    if (center[0] !== 0 && center[1] !== 0) {
-      map.setView(center, map.getZoom());
-    }
-  }, [center, map]);
-
-  return null;
-}
 
 function UberMap() {
-  const liveCoords = useGetUserLiveLocation();
+  const mapRef = useRef<mapboxgl.Map | null>(null);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const markerRef = useRef<mapboxgl.Marker | null>(null);
 
-  const markerRef = useRef<LeafletMarker>(null);
+  const [longitude, setLongitude] = useState(0);
+  const [latitude, setLatitude] = useState(0);
 
-  const [latitude, setLatitude] = useState<number>();
-  const [longitude, setLongitude] = useState<number>();
+  const [emptyScreenMsg, setEmptyScreenMsg] = useState<string>("");
+
+  const [lat, lng] = useGetUserLiveLocation();
 
   useEffect(() => {
-    if (liveCoords && liveCoords[0] != null && liveCoords[1] != null) {
-      setLatitude(liveCoords[0]);
-      setLongitude(liveCoords[1]);
+    if (lat && lng) {
+      setLongitude(lng);
+      setLatitude(lat);
+      setEmptyScreenMsg("")
+    } else {
+      setEmptyScreenMsg(
+        "Please allow permssion for this site to access your location",
+      );
+      return;
     }
-  }, [liveCoords]);
 
-  const eventHandlers = useMemo(
-    () => ({
-      dragend() {
-        const marker = markerRef.current;
-        if (marker != null) {
-          const latLng = marker.getLatLng();
+    mapRef.current = new mapboxgl.Map({
+      accessToken: MAPBOX_ACCESS_TOKEN,
+      style: "mapbox://styles/mapbox/standard",
+      container: mapContainerRef.current!,
+      center: [lng, lat],
+      zoom: 14,
+    });
 
-          setLatitude(latLng.lat);
-          setLongitude(latLng.lng);
+    markerRef.current = new mapboxgl.Marker({ draggable: true })
+      .setLngLat([lng, lat])
+      .addTo(mapRef.current);
 
-          console.log("New coordinates after drag:", latLng.lat, latLng.lng);
-        }
-      },
-    }),
-    [],
-  );
+    markerRef.current.on("dragend", () => {
+      if (!mapRef.current || !markerRef.current) return;
 
-  if (latitude === undefined || longitude === undefined) {
-    return (
-      <div style={{ padding: "20px", textAlign: "center" }}>
-        Loading map or waiting for location permissions...
-      </div>
-    );
-  }
+      const lngLat = markerRef.current.getLngLat();
+      mapRef.current.flyTo({
+        center: [lngLat.lng, lngLat.lat],
+        essential: true,
+      });
+      setLatitude(lngLat.lat);
+      setLongitude(lngLat.lng);
+    });
 
-  const centerPosition: [number, number] = [latitude, longitude];
+    return () => {
+      mapRef.current?.remove();
+    };
+  }, [lat, lng]);
 
   return (
-    <MapContainer
-      center={centerPosition}
-      zoom={13}
-      style={{ height: "100vh", width: "100%" }}
-    >
-      <TileLayer
-        url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    <div className="relative h-screen w-full">
+      {emptyScreenMsg.length > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center bg-white/80 z-50 text-lg font-semibold">
+          {emptyScreenMsg}
+        </div>
+      )}
+      <div
+        className="h-screen w-full"
+        id="map-container"
+        ref={mapContainerRef}
       />
-
-      <RecenterMap center={centerPosition} />
-
-      <Marker
-        position={centerPosition}
-        draggable={true}
-        eventHandlers={eventHandlers}
-        ref={markerRef}
-      >
-        <Popup>You are here</Popup>
-      </Marker>
-    </MapContainer>
+    </div>
   );
 }
 
