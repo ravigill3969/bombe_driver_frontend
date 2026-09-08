@@ -1,30 +1,21 @@
-//firstname
-// lastname
-// email
-// phone
-// license no
+ import RiderInfo from "@/components/login_ui/rider_info";
+import NavDesktop from "@/components/nav/nav_desktop";
 
-function Register() {
+function DriverRegister() {
   return (
-    <div>
-      <div className="flex h-screen justify-center w-full items-center">
+    <div className="min-h-screen bg-zinc-50 flex flex-col justify-between">
+      <NavDesktop NavFor="rider" />
+
+      <div className="flex min-h-[calc(100vh-4rem)] w-full items-stretch justify-center bg-zinc-100/50">
         {/*left*/}
-
-        <div className=" h-full w-full border-r-2 border-gray-600">info</div>
-        
-
-        <div className="hidden lg:block h-full w-full">
-          <img
-            src={
-              "https://images.pexels.com/photos/15072149/pexels-photo-15072149.jpeg"
-            }
-            className="w-full h-full object-cover object-center"
-          />
-        </div>
+        <RiderInfo />
       </div>
-      <footer>footer</footer>
+
+      <footer className="py-4 border-t border-zinc-200 bg-white text-center text-xs font-medium text-zinc-500">
+        © Bombe Inc. All rights reserved.
+      </footer>
     </div>
   );
 }
 
-export default Register;
+export default DriverRegister;

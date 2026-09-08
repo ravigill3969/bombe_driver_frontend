@@ -7,12 +7,19 @@ export interface SearchLocationResT {
   coordinates: [number, number]; // [lng, lat]
 }
 
+type FeaturesT = {
+  id: string;
+  text: string; // E.g., "61 Drinking Lane"
+  place_name: string; // E.g., "61 Drinking Lane, Toronto, ON, Canada"
+  center: [number, number]; // [lng, lat]
+};
+
 function useSearchLocation() {
   const serachLocation = async (
     query: string,
   ): Promise<SearchLocationResT[]> => {
     if (query.length < 2) {
-      return []
+      return [];
     }
 
     const url = `
@@ -26,16 +33,16 @@ function useSearchLocation() {
 
     const res = await response.json();
     if (!response.ok) {
-      console.log(res);
       return [];
     }
 
-    return res.features.map((feature) => ({
-            id: feature.id,
-            name: feature.text,             // Mapbox '.text' becomes your '.name'
-            fullName: feature.place_name,   // Mapbox '.place_name' becomes your '.fullName'
-            coordinates: feature.center,    // Mapbox '.center' becomes your '.coordinates'
-          }));  };
+    return res.features.map((feature: FeaturesT) => ({
+      id: feature.id,
+      name: feature.text,
+      fullName: feature.place_name,
+      coordinates: feature.center,
+    }));
+  };
 
   return serachLocation;
 }

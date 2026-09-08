@@ -5,13 +5,19 @@ function useGetUserLiveLocation() {
   const [longitude, setLongitude] = useState<number | null>(null);
 
   if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
+    navigator.geolocation.watchPosition(
       (position) => {
         setLatitude(position.coords.latitude);
         setLongitude(position.coords.longitude);
       },
       (error) => {
         console.error(error);
+      },
+      {
+        enableHighAccuracy: true,
+        maximumAge: 0,
+        timeout: 300000,
+        
       },
     );
   } else {
