@@ -4,9 +4,15 @@ import { Link } from "react-router";
 
 interface NavDesktopProps {
   NavFor: "driver" | "rider" | "home";
+  isDriverVerified?: boolean;
+  isRiderVerified?: boolean;
 }
 
-function NavDesktop({ NavFor }: NavDesktopProps) {
+function NavDesktop({
+  NavFor,
+  isDriverVerified,
+  isRiderVerified,
+}: NavDesktopProps) {
   return (
     <header className="sticky overflow-hidden  top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-md shadow-xs transition-all">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
@@ -27,45 +33,81 @@ function NavDesktop({ NavFor }: NavDesktopProps) {
           <div className="flex items-center gap-3">
             {NavFor == "rider" && (
               <>
-                <button
-                  className={
-                    "bg-zinc-100 text-zinc-900 cursor-pointer hover:bg-zinc-200 border border-zinc-300 px-4 py-2 rounded-full flex justify-center gap-2 items-center font-semibold text-sm transition-all duration-200 active:scale-95 shadow-xs"
-                  }
-                >
-                  <Link to={"/rider"} className="flex gap-2 items-center">
-                    <User strokeWidth={2.5} size={15} />
-                    Login
-                  </Link>
-                </button>
-                <Button
-                  className={
-                    "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
-                  }
-                >
-                  <Link to={"/rider/register"}>Sign up</Link>
-                </Button>
+                {!isRiderVerified ? (
+                  <>
+                    <button
+                      className={
+                        "bg-zinc-100 text-zinc-900 cursor-pointer hover:bg-zinc-200 border border-zinc-300 px-4 py-2 rounded-full flex justify-center gap-2 items-center font-semibold text-sm transition-all duration-200 active:scale-95 shadow-xs"
+                      }
+                    >
+                      <Link to={"/rider"} className="flex gap-2 items-center">
+                        <User strokeWidth={2.5} size={15} />
+                        Login
+                      </Link>
+                    </button>
+                    <Button
+                      className={
+                        "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                      }
+                    >
+                      <Link to={"/rider/register"}>Sign up</Link>
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    className={
+                      "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                    }
+                  >
+                    <Link
+                      to={"/rider/riderinfo"}
+                      className="flex gap-2 items-center"
+                    >
+                      <User strokeWidth={2.5} size={15} />
+                      Profile
+                    </Link>
+                  </Button>
+                )}
               </>
             )}
 
             {NavFor == "driver" && (
               <>
-                <button
-                  className={
-                    "bg-zinc-100 text-zinc-900 cursor-pointer hover:bg-zinc-200 border border-zinc-300 px-4 py-2 rounded-full flex justify-center gap-2 items-center font-semibold text-sm transition-all duration-200 active:scale-95 shadow-xs"
-                  }
-                >
-                  <Link to={"/driver"} className="flex gap-2 items-center">
-                    <User strokeWidth={2.5} size={15} />
-                    Login
-                  </Link>
-                </button>
-                <Button
-                  className={
-                    "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
-                  }
-                >
-                  <Link to={"/driver/register"}>Sign up</Link>
-                </Button>
+                {!isDriverVerified ? (
+                  <>
+                    <button
+                      className={
+                        "bg-zinc-100 text-zinc-900 cursor-pointer hover:bg-zinc-200 border border-zinc-300 px-4 py-2 rounded-full flex justify-center gap-2 items-center font-semibold text-sm transition-all duration-200 active:scale-95 shadow-xs"
+                      }
+                    >
+                      <Link to={"/driver"} className="flex gap-2 items-center">
+                        <User strokeWidth={2.5} size={15} />
+                        Login
+                      </Link>
+                    </button>
+                    <Button
+                      className={
+                        "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                      }
+                    >
+                      <Link to={"/driver/register"}>Sign up</Link>
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    className={
+                      "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                    }
+                  >
+                    <Link
+                      to={"/driver/driverinfo"}
+                      className="flex gap-2 items-center"
+                    >
+                      <User strokeWidth={2.5} size={15} />
+                      Profile
+                    </Link>
+                  </Button>
+                )}
               </>
             )}
             {NavFor == "home" && (

@@ -1,4 +1,4 @@
-import {useLoginDriver} from "@/API/driver/driver_api";
+import { useLoginDriver } from "@/API/driver/driver_api";
 import NavDesktop from "@/components/nav/nav_desktop";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,7 +32,7 @@ function DriverLogIn() {
   const { mutate } = useLoginDriver();
   return (
     <div className="min-h-screen bg-zinc-50/60">
-      <NavDesktop NavFor="driver" />
+      <NavDesktop NavFor="driver" isDriverVerified={false} />
       <div className="flex min-h-[calc(100vh-4rem)] justify-center items-center px-4 py-12">
         <Card className="w-full max-w-md border-zinc-200/80 bg-white shadow-xl shadow-zinc-200/50 rounded-2xl transition-all">
           <CardHeader className="space-y-1.5 pb-4">
@@ -103,7 +103,7 @@ function DriverLogIn() {
               type="submit"
               className="w-full bg-zinc-900 text-white hover:bg-zinc-800 h-11 rounded-xl font-semibold shadow-sm transition-all active:scale-[0.99] cursor-pointer"
               onClick={(e) => {
-                e.preventDefault()
+                e.preventDefault();
                 mutate({ email, password });
               }}
             >

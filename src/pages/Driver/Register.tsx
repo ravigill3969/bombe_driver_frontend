@@ -4,7 +4,7 @@ import NavDesktop from "@/components/nav/nav_desktop";
 function DriverRegister() {
   return (
     <div className="min-h-screen bg-zinc-50 flex flex-col justify-between">
-      <NavDesktop NavFor="driver" />
+      <NavDesktop NavFor="driver" isDriverVerified={false} />
 
       <div className="flex min-h-[calc(100vh-4rem)] w-full items-stretch justify-center bg-zinc-100/50">
         {/*left*/}

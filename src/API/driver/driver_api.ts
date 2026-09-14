@@ -1,7 +1,12 @@
 import { BACKEND_API } from "@/global/env";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
-import type { DriverRegisterRequest, LoginRes, LoginT } from "./driver_types";
+import type {
+  DriverRegisterRequest,
+  LoginRes,
+  LoginT,
+  UpdatePasswordRequest,
+} from "./driver_types";
 import { useNavigate } from "react-router";
 
 const useLoginDriver = () => {
@@ -18,12 +23,10 @@ const useLoginDriver = () => {
     });
 
     const res = await response.json();
-    console.log(res);
     if (!response.ok) {
       const errorMessage = res.message || res.error || "Login failed";
       throw new Error(errorMessage);
     }
-    
 
     return res;
   };
@@ -57,7 +60,6 @@ const useRegisterDriver = () => {
     });
 
     const res = await response.json();
-    console.log(res);
     if (!response.ok) {
       const errorMessage = res.message || res.error || "Register failed";
       throw new Error(errorMessage);
@@ -81,4 +83,36 @@ const useRegisterDriver = () => {
   });
 };
 
-export { useLoginDriver, useRegisterDriver };
+function useUpdateDriverPassword() {
+  const updatePassword = async (data: UpdatePasswordRequest) => {
+    const response = await fetch(`${BACKEND_API}/driver/update-password`, {
+      method: "POST",
+      credentials: "include",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
+
+    const res = await response.json();
+    if (!response.ok) {
+      const errorMessage = res.message || res.error || "Update password failed";
+      throw new Error(errorMessage);
+    }
+
+    return res;
+  };
+
+  return useMutation({
+    mutationKey: ["updatePassword"],
+    mutationFn: updatePassword,
+    onSuccess: () => {
+      toast.success("password updated");
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error(err.message);
+    },
+  });
+}
+export { useLoginDriver, useRegisterDriver, useUpdateDriverPassword };

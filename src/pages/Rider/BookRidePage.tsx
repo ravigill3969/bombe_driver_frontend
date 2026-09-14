@@ -8,18 +8,18 @@ import { useEffect } from "react";
 import { useNavigate } from "react-router";
 function BookRide() {
   const { showRidesWithFare } = useRiderMapContext();
-  const navigate = useNavigate()
-  const { isPending, hasActiveTrip } = useRiderTripContext()
+  const navigate = useNavigate();
+  const { isPending, hasActiveTrip } = useRiderTripContext();
 
   useEffect(() => {
     if (!isPending && hasActiveTrip) {
-      navigate("/rider/rider-active-trip")
+      navigate("/rider/rider-active-trip");
     }
-  }, [isPending, hasActiveTrip, navigate])
+  }, [isPending, hasActiveTrip, navigate]);
 
   return (
     <div className="flex flex-col min-h-screen lg:h-screen lg:overflow-hidden">
-      <NavDesktop NavFor="rider" />
+      <NavDesktop NavFor="rider" isRiderVerified={true} />
 
       <div className="flex flex-col lg:flex-row flex-1 items-stretch gap-6 lg:gap-7 w-[95%] mx-auto py-4 lg:py-6 min-h-0">
         <div className="w-full lg:w-[35%] lg:h-full lg:overflow-y-auto shrink-0">
@@ -33,7 +33,6 @@ function BookRide() {
       </div>
       {/*<Button onClick={() => sendData("water")}>fwevrwvc</Button>*/}
     </div>
-
   );
 }
 

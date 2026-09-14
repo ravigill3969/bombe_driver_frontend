@@ -18,3 +18,10 @@ export interface RiderRegisterRequest {
   home_address: string;
   work_address: string;
 }
+
+
+export type UpdatePasswordRequest = {
+  curr_password: string;
+  new_password: string;
+  confirm_new_password: string;
+};

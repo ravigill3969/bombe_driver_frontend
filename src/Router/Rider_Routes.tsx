@@ -28,7 +28,6 @@ function ProtectedRiderRoutes() {
   }
 
   return <Outlet />;
-
 }
 
 export function RiderRoutes() {
@@ -39,9 +38,8 @@ export function RiderRoutes() {
 
         <Route path="login" element={<RiderLogIn />} />
 
-        <Route path="riderinfo" element={<RiderInfo />} />
-
         <Route element={<ProtectedRiderRoutes />}>
+          <Route path="riderinfo" element={<RiderInfo />} />
           <Route
             path=""
             element={

@@ -21,7 +21,7 @@ function DriveHome() {
   }, [isPending, hasActiveTrip, location.pathname, navigate]);
   return (
     <div className="flex flex-col h-screen overflow-hidden ">
-      <NavDesktop NavFor="driver" />
+      <NavDesktop NavFor="driver" isDriverVerified={true} />
       <div className="flex flex-col lg:flex-row overflow-hidden h-[80vh] mx-10 mt-10 rounded-2xl gap-5">
         <DriverMapView />
         <DriveLiveButton />

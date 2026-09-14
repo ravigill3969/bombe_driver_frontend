@@ -33,7 +33,7 @@ function RiderLogIn() {
 
   return (
     <div className="min-h-screen bg-zinc-50/60">
-      <NavDesktop NavFor="rider" />
+      <NavDesktop NavFor="rider" isRiderVerified={false} />
       <div className="flex min-h-[calc(100vh-4rem)] justify-center items-center px-4 py-12">
         <Card className="w-full max-w-md border-zinc-200/80 bg-white shadow-xl shadow-zinc-200/50 rounded-2xl transition-all">
           <CardHeader className="space-y-1.5 pb-4">

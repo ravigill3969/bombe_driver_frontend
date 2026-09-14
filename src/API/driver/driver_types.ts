@@ -33,3 +33,9 @@ export type DriverRegisterRequest = {
   driver_info: DriverInfo;
   car_info: VehicleInfo;
 };
+
+export type UpdatePasswordRequest = {
+  curr_password: string;
+  new_password: string;
+  confirm_new_password: string;
+};
