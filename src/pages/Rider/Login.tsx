@@ -1,4 +1,4 @@
-import useLoginRider from "@/API/rider/rider_apis";
+import {useLoginRider} from "@/API/rider/rider_apis";
 import NavDesktop from "@/components/nav/nav_desktop";
 import { Button } from "@/components/ui/button";
 import {

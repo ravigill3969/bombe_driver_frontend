@@ -1,4 +1,4 @@
-import useLoginDriver from "@/API/driver/driver_api";
+import {useLoginDriver} from "@/API/driver/driver_api";
 import NavDesktop from "@/components/nav/nav_desktop";
 import { Button } from "@/components/ui/button";
 import {

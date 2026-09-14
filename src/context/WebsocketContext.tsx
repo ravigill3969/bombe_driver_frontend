@@ -1,4 +1,5 @@
 import { BACKEND_WEBSOCKET_API } from "@/global/env";
+import { useQueryClient } from "@tanstack/react-query";
 import {
   createContext,
   useContext,
@@ -18,7 +19,7 @@ interface DriverI {
 
 interface RiderI {
   setUserId: (val: string) => void;
-  driver_location: {
+  driver_location_for_rider: {
     lng: number;
     lat: number;
   } | null;
@@ -66,6 +67,22 @@ interface AssignedDriverLocationUpdate {
   type: string;
 }
 
+export interface CompleteTripDataToUser {
+  type: string;
+  trip_id: string;
+  rider_id: string;
+  driver_id: string;
+}
+
+export interface CancelTripDataToUser {
+  type: string;
+  trip_id: string;
+  rider_id: string;
+  driver_id: string;
+  message: string;
+  driver_or_rider: string;
+}
+
 const WebSocketContext = createContext<WebSocketContextType | null>(null);
 
 export function WebSocketContextProvider({
@@ -73,17 +90,20 @@ export function WebSocketContextProvider({
 }: {
   children: ReactNode;
 }) {
+  const queryClient = useQueryClient();
   const socket = useRef<WebSocket | null>(null);
   const [webSocketError, setWebSocketError] = useState<string | null>(null);
 
-  const [isDriverOnline, setIsDriverOnline] = useState(false);
+  const [isDriverOnline, setIsDriverOnline] = useState(() => {
+    return sessionStorage.getItem("driver") === "true";
+  });
 
   const [userId, setUserId] = useState<string | null>(null);
 
   const [tripDataOfferRequestForDriver, setTripDataOfferRequestForDriver] =
     useState<TripDataOfferRequestToDriverT | null>(null);
 
-  const [driver_location, setDriverLocation] = useState<{
+  const [driver_location_for_rider, setDriverLocationForRider] = useState<{
     lng: number;
     lat: number;
   } | null>(null);
@@ -100,7 +120,6 @@ export function WebSocketContextProvider({
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-      console.log(data);
 
       if ((data.type as string) == "RIDE_REQUEST_TO_DRIVER") {
         const reqDataForDriver: TripDataOfferRequestToDriverT = data;
@@ -109,9 +128,25 @@ export function WebSocketContextProvider({
 
       if ((data.type as string) == "ASSIGNED_DRIVER_LOCATION_UPDATE") {
         const info: AssignedDriverLocationUpdate = data;
-        setDriverLocation({
+        setDriverLocationForRider({
           lat: info.latitude,
           lng: info.longitude,
+        });
+      }
+
+      if ((data.type as string) == "CANCEL_TRIP") {
+        const info: CancelTripDataToUser = data;
+        console.log("trip canceld by ", info.driver_or_rider);
+        queryClient.invalidateQueries({
+          queryKey: ["getActiveTripWithRiderId"],
+        });
+      }
+
+      if ((data.type as string) == "COMPLETE_TRIP") {
+        const info: CompleteTripDataToUser = data;
+        console.log("trip completed ", info);
+        queryClient.invalidateQueries({
+          queryKey: ["getActiveTripWithRiderId"],
         });
       }
     };
@@ -134,7 +169,7 @@ export function WebSocketContextProvider({
 
   const sendData = (data: unknown) => {
     if (socket.current?.readyState !== WebSocket.OPEN) {
-      console.log("WebSocket is not connected");
+      console.error("websocket connection failure");
       return;
     }
 
@@ -154,7 +189,7 @@ export function WebSocketContextProvider({
         },
         rider: {
           setUserId,
-          driver_location,
+          driver_location_for_rider,
         },
       }}
     >

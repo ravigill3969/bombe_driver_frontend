@@ -17,7 +17,7 @@ import {
 } from "@/hooks/useUpdateRoute";
 import { MAPBOX_ACCESS_TOKEN } from "@/global/env";
 import { useWebSocket } from "../WebsocketContext";
-import  { useRiderInfoContext } from "../RiderInfoContext";
+import { useRiderInfoContext } from "../RiderInfoContext";
 
 interface RiderMapContextValue {
   map: mapboxgl.Map | null;
@@ -139,6 +139,13 @@ function RiderMapProviderInner({ children }: { children: ReactNode }) {
       pickUpMarkerRef.current.remove();
       pickUpMarkerRef.current = null;
     }
+
+    return () => {
+       if (pickUpMarkerRef.current) {
+         pickUpMarkerRef.current.remove();
+         pickUpMarkerRef.current = null;
+       }
+     };
   }, [map, pickup_coords, isDragable, reverseGeocoding]);
 
   useEffect(() => {
@@ -180,6 +187,13 @@ function RiderMapProviderInner({ children }: { children: ReactNode }) {
       dropOffMarkerRef.current.remove();
       dropOffMarkerRef.current = null;
     }
+
+    return () => {
+      if (dropOffMarkerRef.current) {
+        dropOffMarkerRef.current.remove();
+        dropOffMarkerRef.current = null;
+      }
+    };
   }, [map, dropoff_coords, isDragable, reverseGeocoding]);
 
   useEffect(() => {

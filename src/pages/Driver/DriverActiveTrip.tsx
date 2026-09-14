@@ -1,5 +1,4 @@
 import {
-  useCompletedTrip,
   useUpdateTripStatusToPicked,
 } from "@/API/trip/trip_apis";
 import DriverMapView from "@/components/map/MapComponents/DriverMapView";
@@ -12,22 +11,23 @@ import { useEffect } from "react";
 function ActiveTrip() {
   const {
     isPending,
-    isSuccess,
+    hasActiveTrip,
     isDriverNearDropoff,
     isDriverNearPickup,
     trip_id,
+    cancel_trip,
+    complete_trip
   } = useDriverTripContext();
   const {
     driver: { setIsDriverOnline },
   } = useWebSocket();
   const { mutate } = useUpdateTripStatusToPicked();
-  const { mutate : tripCompletedMutate } = useCompletedTrip();
 
   useEffect(() => {
-    if (!isPending && isSuccess) {
+    if (!isPending && hasActiveTrip) {
       setIsDriverOnline(true);
     }
-  }, [isPending, isSuccess, setIsDriverOnline]);
+  }, [isPending, hasActiveTrip, setIsDriverOnline]);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden ">
@@ -35,12 +35,14 @@ function ActiveTrip() {
       <div className="flex flex-col lg:flex-row overflow-hidden h-[80vh] mx-10 mt-10 rounded-2xl gap-5">
         <DriverMapView />
         {isDriverNearDropoff && (
-          <Button onClick={() => tripCompletedMutate({ trip_id: trip_id })}>Dropoff</Button>
+          <Button onClick={() => complete_trip() }>Dropoff</Button>
         )}
         {isDriverNearPickup && (
           <Button onClick={() => mutate({ trip_id: trip_id })}> Pickup</Button>
         )}
+        <Button onClick={()=> cancel_trip()}>Cancel </Button>
       </div>
+
     </div>
   );
 }

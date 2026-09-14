@@ -26,7 +26,7 @@ export interface ActiveTripResponse {
   rideDetails: RideDetails;
   driverFare: number;
   riderId: string;
-  tripId : string
+  tripId: string;
 }
 
 export interface ErrorActiveTripResponse {
@@ -34,7 +34,13 @@ export interface ErrorActiveTripResponse {
   isSuccess: false;
 }
 
-export type UpdateTripStatusToAssignedReqT= {
+/**
+ * The backend answers with an empty object when there is no active trip.
+ * The API layer normalizes this shape into `null`.
+ */
+export type EmptyActiveTripResponse = Record<string, never>;
+
+export type UpdateTripStatusToAssignedReqT = {
   trip_id: string;
 };
 
@@ -44,8 +50,8 @@ export type UpdateTripStatusToAssignedResT = {
 };
 
 export type RiderPickedReq = {
-  trip_id: string
-}
+  trip_id: string;
+};
 
 export type RiderPickedResT = {
   message: string;
@@ -53,8 +59,9 @@ export type RiderPickedResT = {
 };
 
 export type TripCompletedReq = {
-  trip_id: string
-}
+  trip_id: string;
+  rider_id : string
+};
 
 export type TripCompletedResT = {
   message: string;
@@ -65,10 +72,14 @@ export interface ActiveTripRiderResponse {
   pickup: Location;
   dropoff: Location;
   rideDetails: RideDetails;
-  driverFare: number;
+  driverFare: number; 
   riderId: string;
-  tripId : string
+  tripId: string;
 }
 
-
-
+export interface CancelTripWithDriverIdRequest {
+  driver_id: string;
+  rider_id: string;
+  trip_id: string;
+  reason: string;
+}

@@ -7,12 +7,12 @@ import { useRiderMapContext } from "./RiderMapContext";
 
 import type { ActiveTripRiderResponse } from "@/API/trip/trip_types";
 import { useWebSocket } from "../WebsocketContext";
-import  { Routing_Profile, useUpdateRoute } from "@/hooks/useUpdateRoute";
+import { Routing_Profile, useUpdateRoute } from "@/hooks/useUpdateRoute";
 import { MAPBOX_ACCESS_TOKEN } from "@/global/env";
 
 type RiderTripContextT = {
   isPending: boolean;
-  isSuccess: boolean;
+  hasActiveTrip: boolean;
 };
 
 const RiderTripContext = createContext<RiderTripContextT | undefined>(
@@ -20,12 +20,14 @@ const RiderTripContext = createContext<RiderTripContextT | undefined>(
 );
 
 function getCoordinates(
-  data: ActiveTripRiderResponse | undefined,
+  data: ActiveTripRiderResponse | null | undefined,
   type: "pickup" | "dropoff",
 ): [number, number] | undefined {
   if (!data) return undefined;
 
   const location = type === "pickup" ? data.pickup : data.dropoff;
+
+  if (!location) return undefined;
 
   return [location.longitude, location.latitude];
 }
@@ -35,18 +37,25 @@ export function RiderTripContextProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const { isSuccess, isPending, data } = useGetActiveTripWithRiderId();
+  const { data, isPending } = useGetActiveTripWithRiderId();
   const navigate = useNavigate();
 
-  if (!isSuccess && !isPending) {
-    navigate("/rider");
-  }
+  // The query resolves with `null` when the rider has no active trip (the
+  // backend answers with `{}`), but React Query still reports that as a
+  // successful fetch. Derive trip presence from the data instead.
+  const hasActiveTrip = data != null;
+
+  useEffect(() => {
+    if (!isPending && !hasActiveTrip) {
+      navigate("/rider");
+    }
+  }, [hasActiveTrip, isPending, navigate]);
 
   const { map } = useRiderMapContext();
-  const {fetchRoute}= useUpdateRoute()
+  const { fetchRoute } = useUpdateRoute();
 
   const {
-    rider: { driver_location },
+    rider: { driver_location_for_rider: driver_location},
   } = useWebSocket();
 
   const driverLocationMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -123,6 +132,13 @@ export function RiderTripContextProvider({
     } else {
       driverLocationMarkerRef.current.setLngLat(driver_coords);
     }
+
+    return () => {
+      if (driverLocationMarkerRef.current) {
+        driverLocationMarkerRef.current.remove();
+        driverLocationMarkerRef.current = null;
+      }
+    };
   }, [map, driver_coords]);
 
   useEffect(() => {
@@ -138,15 +154,12 @@ export function RiderTripContextProvider({
       }
     };
 
-    if (!driver_coords || !routeDestination ) {
+    if (!driver_coords || !routeDestination) {
       clearRoute();
       return;
     }
 
-    const origin: [number, number] = [
-      driver_coords.lng,
-      driver_coords.lat,
-    ];
+    const origin: [number, number] = [driver_coords.lng, driver_coords.lat];
 
     const destination = routeDestination;
 
@@ -188,7 +201,7 @@ export function RiderTripContextProvider({
   }, [map, routeDestination, fetchRoute, driver_coords]);
 
   return (
-    <RiderTripContext.Provider value={{ isPending, isSuccess }}>
+    <RiderTripContext.Provider value={{ isPending, hasActiveTrip }}>
       {" "}
       {children}
     </RiderTripContext.Provider>

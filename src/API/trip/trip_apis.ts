@@ -9,9 +9,12 @@ import type {
   TripCompletedReq,
   TripCompletedResT,
   ActiveTripRiderResponse,
+  CancelTripWithDriverIdRequest,
+  EmptyActiveTripResponse,
 } from "./trip_types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router";
 
 export function useAssignTripToDriver() {
   const queryClinet = useQueryClient();
@@ -53,31 +56,36 @@ export function useAssignTripToDriver() {
 
   return mutate;
 }
-
 export function useGetActiveTripWithDriverId() {
-  const getActiveTripWithDriverId = async (): Promise<ActiveTripResponse> => {
-    const res = await fetch(
-      `${BACKEND_API}/trip/get-active-trip-with-driverid`,
-      {
-        method: "GET",
-        credentials: "include",
-      },
-    );
+  const getActiveTripWithDriverId =
+    async (): Promise<ActiveTripResponse | null> => {
+      const res = await fetch(
+        `${BACKEND_API}/trip/get-active-trip-with-driverid`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
 
-    const response = await res.json();
-    if (!res.ok) {
-      const error: ErrorActiveTripResponse = await res.json();
-      throw new Error(error.error);
-    }
+      const response:
+        ActiveTripResponse | EmptyActiveTripResponse | ErrorActiveTripResponse =
+        await res.json();
 
-    return response;
-  };
+      if (!res.ok) {
+        throw new Error((response as ErrorActiveTripResponse).error);
+      }
+
+      if (!response || Object.keys(response).length === 0) {
+        return null;
+      }
+
+      return response as ActiveTripResponse;
+    };
 
   return useQuery({
     queryKey: ["getActiveTripWithDriverId"],
     queryFn: getActiveTripWithDriverId,
     retry: false,
-    refetchInterval: (query) => (query.state.data ? 10_000 : false),
   });
 }
 
@@ -124,8 +132,11 @@ export function useUpdateTripStatusToPicked() {
 }
 
 export function useCompletedTrip() {
+  const navigate = useNavigate();
   const queryClinet = useQueryClient();
-  const completedTrip = async (data: TripCompletedReq): Promise<TripCompletedResT> => {
+  const completedTrip = async (
+    data: TripCompletedReq,
+  ): Promise<TripCompletedResT> => {
     const res = await fetch(`${BACKEND_API}/trip/trip-completed`, {
       method: "POST",
       credentials: "include",
@@ -138,7 +149,8 @@ export function useCompletedTrip() {
     const response = await res.json();
 
     if (!res.ok) {
-      const errorMessage = response.message || response.error || "completing trip failed";
+      const errorMessage =
+        response.message || response.error || "completing trip failed";
       throw new Error(errorMessage);
     }
 
@@ -149,10 +161,11 @@ export function useCompletedTrip() {
     mutationFn: completedTrip,
     mutationKey: ["completedTrip"],
     onSuccess: (data) => {
-      toast.success(data.message);
       queryClinet.invalidateQueries({
         queryKey: ["getActiveTripWithDriverId"],
       });
+      navigate("/driver");
+      toast.success(data.message);
     },
     onError: (e) => {
       toast.error(e.message);
@@ -163,12 +176,54 @@ export function useCompletedTrip() {
 }
 
 export function useGetActiveTripWithRiderId() {
-  const getActiveTripWithRiderId = async (): Promise<ActiveTripRiderResponse> => {
+  const getActiveTripWithRiderId =
+    async (): Promise<ActiveTripRiderResponse | null> => {
+      const res = await fetch(
+        `${BACKEND_API}/trip/get-active-trip-with-riderid`,
+        {
+          method: "GET",
+          credentials: "include",
+        },
+      );
+
+      const response:
+        | ActiveTripRiderResponse
+        | EmptyActiveTripResponse
+        | ErrorActiveTripResponse = await res.json();
+
+      if (!res.ok) {
+        throw new Error((response as ErrorActiveTripResponse).error);
+      }
+
+      if (!response || Object.keys(response).length === 0) {
+        return null;
+      }
+
+      return response as ActiveTripRiderResponse;
+    };
+
+  return useQuery({
+    queryKey: ["getActiveTripWithRiderId"],
+    queryFn: getActiveTripWithRiderId,
+    retry: false,
+  });
+}
+
+export function useCancelTripWithDriverId() {
+  const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const getActiveTripWithDriverId = async (
+    data: CancelTripWithDriverIdRequest,
+  ): Promise<ActiveTripRiderResponse> => {
     const res = await fetch(
-      `${BACKEND_API}/trip/get-active-trip-with-riderid`,
+      `${BACKEND_API}/trip/cancel-active-trip-with-driverid`,
       {
-        method: "GET",
+        method: "POST",
         credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       },
     );
 
@@ -181,10 +236,15 @@ export function useGetActiveTripWithRiderId() {
     return response;
   };
 
-  return useQuery({
-    queryKey: ["getActiveTripWithRiderId"],
-    queryFn: getActiveTripWithRiderId,
+  return useMutation({
+    mutationKey: ["getActiveTripWithDriverId"],
+    mutationFn: getActiveTripWithDriverId,
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["getActiveTripWithDriverId"],
+      });
+      navigate("/driver");
+    },
     retry: false,
-    refetchInterval: (query) => (query.state.data ? 10_000 : false),
   });
 }

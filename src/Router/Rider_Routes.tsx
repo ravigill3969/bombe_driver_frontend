@@ -6,25 +6,29 @@ import {
   useRiderInfoContext,
 } from "@/context/RiderInfoContext";
 import { RiderMapProvider } from "@/context/map/RiderMapContext";
+import { WebSocketContextProvider } from "@/context/WebsocketContext";
+import { RiderTripContextProvider } from "@/context/map/RiderTripContext";
 
 // Rider Pages
 import RiderLogIn from "@/pages/Rider/Login";
 import RiderRegister from "@/pages/Rider/Register";
 import BookRide from "@/pages/Rider/BookRidePage";
 import RiderInfo from "@/pages/Rider/RiderInfo";
-import { WebSocketContextProvider } from "@/context/WebsocketContext";
 import RiderActiveTrip from "@/pages/Rider/RiderActiveTrip";
-import { RiderTripContextProvider } from "@/context/map/RiderTripContext";
 
-// Auth Guard for Private Rider Routes
 function ProtectedRiderRoutes() {
-  const { isVerified } = useRiderInfoContext();
+  const { isVerified, isLoading } = useRiderInfoContext();
+
+  if (isLoading) {
+    return null;
+  }
 
   if (!isVerified) {
-    <Navigate to="/rider/login" replace />;
+    return <Navigate to="/rider/login" replace />;
   }
 
   return <Outlet />;
+
 }
 
 export function RiderRoutes() {
@@ -32,7 +36,9 @@ export function RiderRoutes() {
     <RiderInfoProvider>
       <Routes>
         <Route path="register" element={<RiderRegister />} />
+
         <Route path="login" element={<RiderLogIn />} />
+
         <Route path="riderinfo" element={<RiderInfo />} />
 
         <Route element={<ProtectedRiderRoutes />}>
@@ -48,8 +54,9 @@ export function RiderRoutes() {
               </WebSocketContextProvider>
             }
           />
+
           <Route
-            path="/rider-active-trip"
+            path="rider-active-trip"
             element={
               <WebSocketContextProvider>
                 <RiderMapProvider>

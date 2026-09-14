@@ -1,7 +1,6 @@
 import { BACKEND_API } from "@/global/env";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, useEffect, type ReactNode } from "react";
-import { useNavigate } from "react-router";
+import { createContext, useContext, type ReactNode } from "react";
 
 export interface RiderInfoI {
   firstname: string;
@@ -31,9 +30,8 @@ const RiderInfoContext = createContext<RiderInfoContextType | undefined>(
 );
 
 export function RiderInfoProvider({ children }: { children: ReactNode }) {
-  const navigate = useNavigate();
 
-  const { data, isError, isLoading } = useQuery({
+  const { data, isLoading } = useQuery({
     queryKey: ["validate_user"],
     queryFn: async (): Promise<VerifyUserRes> => {
       const response = await fetch(`${BACKEND_API}/rider/verify`, {
@@ -51,11 +49,7 @@ export function RiderInfoProvider({ children }: { children: ReactNode }) {
     retry: false,
   });
 
-  useEffect(() => {
-    if (isError) {
-      navigate("/rider/login", { replace: true });
-    }
-  }, [isError, navigate]);
+ 
 
   const riderInfo: RiderInfoI | null = data
     ? { ...data.data, isVerified: true }

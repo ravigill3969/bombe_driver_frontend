@@ -9,13 +9,13 @@ import { useNavigate } from "react-router";
 function BookRide() {
   const { showRidesWithFare } = useRiderMapContext();
   const navigate = useNavigate()
-  const { isPending, isSuccess } = useRiderTripContext()
+  const { isPending, hasActiveTrip } = useRiderTripContext()
 
   useEffect(() => {
-    if (!isPending && isSuccess) {
+    if (!isPending && hasActiveTrip) {
       navigate("/rider/rider-active-trip")
     }
-  })
+  }, [isPending, hasActiveTrip, navigate])
 
   return (
     <div className="flex flex-col min-h-screen lg:h-screen lg:overflow-hidden">

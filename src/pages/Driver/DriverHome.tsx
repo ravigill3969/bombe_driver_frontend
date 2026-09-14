@@ -6,19 +6,19 @@ import { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router";
 
 function DriveHome() {
-  const { isPending, isSuccess } = useDriverTripContext();
+  const { isPending, hasActiveTrip } = useDriverTripContext();
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     if (
       !isPending &&
-      isSuccess &&
+      hasActiveTrip &&
       location.pathname !== "/driver/active-trip"
     ) {
       navigate("/driver/active-trip");
     }
-  }, [isPending, isSuccess, location.pathname, navigate]);
+  }, [isPending, hasActiveTrip, location.pathname, navigate]);
   return (
     <div className="flex flex-col h-screen overflow-hidden ">
       <NavDesktop NavFor="driver" />

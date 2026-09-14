@@ -11,9 +11,9 @@ interface DriverMapContextValue {
   removeContainer: () => void;
   currentLocationCoords: { lat: number; lng: number } | undefined;
   locationError: boolean;
-  tripData: ActiveTripResponse | undefined;
+  tripData: ActiveTripResponse | null | undefined;
   isAvtiveTripFetchPending: boolean;
-  isActiveTripFetchSuccess: boolean;
+  hasActiveTrip: boolean;
 }
 
 interface DataToSendOnLive {
@@ -45,16 +45,23 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
 
   const { driverInfo, isPending, isVerified } = useDriverInfoContext();
   const {
-    isSuccess: isActiveTripFetchSuccess,
     isPending: isAvtiveTripFetchPending,
     data: tripData,
   } = useGetActiveTripWithDriverId();
+
+  // The query resolves with `null` when the driver has no active trip (the
+  // backend answers with `{}`), but React Query still reports that as a
+  // successful fetch. Routing and trip UI care about whether a trip actually
+  // exists, so derive that from the data instead of relying on `isSuccess`.
+  const hasActiveTrip = tripData != null;
 
   useEffect(() => {
     if (!isPending && isVerified && driverInfo?.driverId) {
       setUserId(driverInfo.driverId);
     }
   }, [isPending, isVerified, driverInfo?.driverId, setUserId]);
+  
+
 
   useEffect(() => {
     if (!map || !currentLocationCoords) return;
@@ -75,7 +82,7 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
       }
       const dataToSend: DataToSendOnLive = {
         driver_id: driverInfo?.driverId as string,
-        type: "LOCATION_UPDATE",
+        type: "LOCATION_UPDATE_FROM_DRIVER",
         is_online: isDriverOnline,
         latitude: currentLocationCoords?.lat,
         longitude: currentLocationCoords?.lng,
@@ -88,7 +95,7 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
 
     return () => clearInterval(interval);
   }, [isDriverOnline, currentLocationCoords]);
-  
+
   return (
     <DriverMapContext.Provider
       value={{
@@ -97,9 +104,9 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
         removeContainer,
         currentLocationCoords,
         locationError,
-        isActiveTripFetchSuccess,
+        hasActiveTrip,
         isAvtiveTripFetchPending,
-        tripData,
+        tripData ,
       }}
     >
       {children}

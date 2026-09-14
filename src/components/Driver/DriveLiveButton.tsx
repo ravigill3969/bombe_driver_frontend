@@ -8,6 +8,7 @@ function DriveLiveButton() {
   } = useWebSocket();
 
   const GoLiveOrOffline = (val: boolean) => {
+    sessionStorage.setItem("driver", String(val));
     setIsDriverOnline(val);
   };
 

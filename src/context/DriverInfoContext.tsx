@@ -1,7 +1,6 @@
 import { BACKEND_API } from "@/global/env";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useContext, useEffect } from "react";
-import { useNavigate } from "react-router";
+import { createContext, useContext } from "react";
 
 type DriverInfoT = {
   firstname: string;
@@ -27,8 +26,7 @@ export function DriverInfoProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const navigate = useNavigate();
-  const { data, isPending, isError } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ["verify_driver"],
     queryFn: async () => {
       const response = await fetch(`${BACKEND_API}/driver/verify`, {
@@ -40,7 +38,6 @@ export function DriverInfoProvider({
       if (!response.ok) {
         const err = res.error;
 
-        navigate("/driver/login");
         throw new Error(err.error || "Failed to verify driver");
       }
 
@@ -49,11 +46,6 @@ export function DriverInfoProvider({
     retry: false,
   });
 
-  useEffect(() => {
-    if (isError) {
-      navigate("/driver/login", { replace: true });
-    }
-  }, [isError, navigate]);
 
   const driverInfo: DriverInfoT | null = data
     ? {

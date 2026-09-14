@@ -16,9 +16,14 @@ import ActiveTrip from "@/pages/Driver/DriverActiveTrip";
 import DriverTripContextProvider from "@/context/map/DriverTripContext";
 
 function ProtectedDriverRoutes() {
-  const { isVerified } = useDriverInfoContext();
+  const { isVerified, isPending } = useDriverInfoContext();
+
+  if (isPending) {
+    return;
+  }
+
   if (!isVerified) {
-    <Navigate to="/driver/login" replace />;
+    return <Navigate to="/driver/login" replace />;
   }
 
   return <Outlet />;

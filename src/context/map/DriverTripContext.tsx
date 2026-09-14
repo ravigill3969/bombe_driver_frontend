@@ -12,19 +12,26 @@ import { useLocation, useNavigate } from "react-router";
 import { Routing_Profile, useUpdateRoute } from "@/hooks/useUpdateRoute";
 import { MAPBOX_ACCESS_TOKEN } from "@/global/env";
 import type { ActiveTripResponse } from "@/API/trip/trip_types";
-import  { useDriverMapContext } from "./DriverMapContext";
+import { useDriverMapContext } from "./DriverMapContext";
+import {
+  useCancelTripWithDriverId,
+  useCompletedTrip,
+} from "@/API/trip/trip_apis";
+import { useDriverInfoContext } from "../DriverInfoContext";
 
 interface TripContextType {
   isPending: boolean;
-  isSuccess: boolean;
+  hasActiveTrip: boolean;
   isDriverNearPickup: boolean;
   isDriverNearDropoff: boolean;
   rider_id: string;
   trip_id: string;
+  cancel_trip: () => void;
+  complete_trip: () => void;
 }
 
 function getCoordinates(
-  data: ActiveTripResponse | undefined,
+  data: ActiveTripResponse | undefined | null,
   type: "pickup" | "dropoff",
 ): [number, number] | undefined {
   if (!data) return undefined;
@@ -43,12 +50,18 @@ function DriverTripContextProvider({
 }) {
   const navigate = useNavigate();
   const location = useLocation();
-  
+
+  const { mutate: tripCancelDriver } = useCancelTripWithDriverId();
+  const { mutate: completeTripMutate } = useCompletedTrip();
+  const { driverInfo } = useDriverInfoContext();
 
   const { fetchRoute } = useUpdateRoute();
-
   const { map, currentLocationCoords } = useMapboxContext();
-  const {isActiveTripFetchSuccess: isSuccess , isAvtiveTripFetchPending : isPending, tripData : data}= useDriverMapContext()
+  const {
+    hasActiveTrip,
+    isAvtiveTripFetchPending: isPending,
+    tripData: data,
+  } = useDriverMapContext();
 
   const pickupLocationMarkerRef = useRef<mapboxgl.Marker | null>(null);
   const destLocationMarkerRef = useRef<mapboxgl.Marker | null>(null);
@@ -81,18 +94,11 @@ function DriverTripContextProvider({
   }, [isPending, data, navigate, location.pathname]);
 
   // Set pickup/dropoff when trip changes
-  const pickup_coords = useMemo(
-    () => getCoordinates(data, "pickup"),
-    [data],
-  );
-  
-  const dropoff_coords = useMemo(
-    () => getCoordinates(data, "dropoff"),
-    [data],
-  );
+  const pickup_coords = useMemo(() => getCoordinates(data, "pickup"), [data]);
+
+  const dropoff_coords = useMemo(() => getCoordinates(data, "dropoff"), [data]);
 
   // Trip status
-
   const tripStatus = data?.rideDetails.status;
 
   const routeDestination =
@@ -125,7 +131,7 @@ function DriverTripContextProvider({
 
     if (!dropoff_coords) {
       destLocationMarkerRef.current?.remove();
-      destLocationMarkerRef.current =  null;
+      destLocationMarkerRef.current = null;
       return;
     }
 
@@ -203,7 +209,7 @@ function DriverTripContextProvider({
     };
   }, [map, currentLocationCoords, routeDestination, fetchRoute]);
 
-  // Check driver's distance from destination
+  // Check driver distance from destination
   const isDriverNearPickup = useMemo(() => {
     if (!currentLocationCoords) return false;
     if (tripStatus !== "assigned" || !pickup_coords) return false;
@@ -215,10 +221,8 @@ function DriverTripContextProvider({
       pickup_coords[0],
     );
 
-    console.log("Distance to pickup:", meters, "meters");
-
     return meters < 1000;
-  }, [currentLocationCoords, tripStatus, pickup_coords ,distanceMeters]);
+  }, [currentLocationCoords, tripStatus, pickup_coords, distanceMeters]);
 
   const isDriverNearDropoff = useMemo(() => {
     if (!currentLocationCoords) return false;
@@ -234,9 +238,9 @@ function DriverTripContextProvider({
     console.log("Distance to dropoff:", meters, "meters");
 
     return meters < 1000;
-  }, [currentLocationCoords, tripStatus, dropoff_coords , distanceMeters]);
+  }, [currentLocationCoords, tripStatus, dropoff_coords, distanceMeters]);
 
-  // Cleanup markers
+  // cleanup marker
   useEffect(() => {
     return () => {
       pickupLocationMarkerRef.current?.remove();
@@ -247,17 +251,35 @@ function DriverTripContextProvider({
     };
   }, []);
 
-  // Render
+  function cancel_trip() {
+    if (!data || !driverInfo) return;
+    tripCancelDriver({
+      rider_id: data.riderId,
+      trip_id: data.tripId,
+      reason: "Coming soon",
+      driver_id: driverInfo.driverId,
+    });
+  }
+
+  function complete_trip() {
+    if (!data) return;
+    completeTripMutate({
+      rider_id: data.riderId,
+      trip_id: data.tripId,
+    });
+  }
 
   return (
     <TripContext.Provider
       value={{
-        isSuccess,
+        hasActiveTrip,
         isPending,
         isDriverNearDropoff,
         isDriverNearPickup,
         rider_id: data?.riderId as string,
         trip_id: data?.tripId as string,
+        cancel_trip,
+        complete_trip,
       }}
     >
       {children}
