@@ -1,6 +1,8 @@
-import { CircleHelpIcon, HandIcon, User } from "lucide-react";
+import { CircleHelpIcon, HandIcon, LogOutIcon, User } from "lucide-react";
 import { Button } from "../ui/button";
 import { Link } from "react-router";
+import { useLogoutDriver } from "@/API/driver/driver_api";
+import { useLogoutRider } from "@/API/rider/rider_apis";
 
 interface NavDesktopProps {
   NavFor: "driver" | "rider" | "home";
@@ -13,6 +15,8 @@ function NavDesktop({
   isDriverVerified,
   isRiderVerified,
 }: NavDesktopProps) {
+  const { mutate: logoutDriver } = useLogoutDriver();
+  const { mutate: logoutRider } = useLogoutRider();
   return (
     <header className="sticky overflow-hidden  top-0 z-50 w-full border-b border-zinc-200 bg-white/90 backdrop-blur-md shadow-xs transition-all">
       <nav className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6 lg:px-8">
@@ -54,19 +58,32 @@ function NavDesktop({
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    className={
-                      "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
-                    }
-                  >
-                    <Link
-                      to={"/rider/riderinfo"}
-                      className="flex gap-2 items-center"
+                  <>
+                    <Button
+                      className={
+                        "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                      }
                     >
-                      <User strokeWidth={2.5} size={15} />
-                      Profile
-                    </Link>
-                  </Button>
+                      <Link
+                        to={"/rider/riderinfo"}
+                        className="flex gap-2 items-center"
+                      >
+                        <User strokeWidth={2.5} size={15} />
+                        Profile
+                      </Link>
+                    </Button>
+                    <Button
+                      onClick={() => logoutRider()}
+                      className={
+                        "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                      }
+                    >
+                      <div className="flex gap-2 items-center">
+                        <LogOutIcon strokeWidth={2.5} size={15} />
+                        Logout
+                      </div>
+                    </Button>
+                  </>
                 )}
               </>
             )}
@@ -94,19 +111,31 @@ function NavDesktop({
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    className={
-                      "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
-                    }
-                  >
-                    <Link
-                      to={"/driver/driverinfo"}
-                      className="flex gap-2 items-center"
+                  <>
+                    <Button
+                      className={
+                        "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                      }
                     >
-                      <User strokeWidth={2.5} size={15} />
-                      Profile
-                    </Link>
-                  </Button>
+                      <Link
+                        to={"/driver/driverinfo"}
+                        className="flex gap-2 items-center"
+                      >
+                        <User strokeWidth={2.5} size={15} />
+                        Profile
+                      </Link>
+                    </Button>
+                    <Button onClick={()=>logoutDriver()}
+                      className={
+                        "cursor-pointer bg-zinc-900 text-white hover:bg-zinc-800 rounded-full px-5 font-semibold shadow-sm hover:shadow-md transition-all active:scale-95"
+                      }
+                    >
+                      <div className="flex gap-2 items-center">
+                        <LogOutIcon strokeWidth={2.5} size={15} />
+                        Logout
+                      </div>
+                    </Button>
+                  </>
                 )}
               </>
             )}

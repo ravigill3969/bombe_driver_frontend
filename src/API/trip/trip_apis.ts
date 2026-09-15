@@ -11,6 +11,7 @@ import type {
   ActiveTripRiderResponse,
   CancelTripWithDriverIdRequest,
   EmptyActiveTripResponse,
+  DriversTodayEarningsResponse,
 } from "./trip_types";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import toast from "react-hot-toast";
@@ -161,6 +162,10 @@ export function useCompletedTrip() {
     mutationFn: completedTrip,
     mutationKey: ["completedTrip"],
     onSuccess: (data) => {
+      // Drop the trip locally right away so the driver map and the websocket
+      // location sender stop referencing the finished trip instead of waiting
+      // for a refetch that races with the navigation below.
+      queryClinet.setQueryData(["getActiveTripWithDriverId"], null);
       queryClinet.invalidateQueries({
         queryKey: ["getActiveTripWithDriverId"],
       });
@@ -240,11 +245,38 @@ export function useCancelTripWithDriverId() {
     mutationKey: ["getActiveTripWithDriverId"],
     mutationFn: getActiveTripWithDriverId,
     onSuccess: () => {
+      queryClient.setQueryData(["getActiveTripWithDriverId"], null);
       queryClient.invalidateQueries({
         queryKey: ["getActiveTripWithDriverId"],
       });
       navigate("/driver");
     },
+    retry: false,
+  });
+}
+
+export function useGetDriversTodayEarnings() {
+  const getDriversTodayEarnings = async () :Promise<DriversTodayEarningsResponse> => {
+    const res = await fetch(
+      `${BACKEND_API}/trip/get-drivers-today-earnings`,
+      {
+        method: "GET",
+        credentials: "include",
+      },
+    );
+
+    const response = await res.json();
+
+    if (!res.ok) {
+      throw new Error("Unable to get drivers earnings");
+    }
+
+    return response;
+  };
+
+  return useQuery({
+    queryKey: ["getDriversTodayEarnings"],
+    queryFn: getDriversTodayEarnings,
     retry: false,
   });
 }

@@ -5,6 +5,7 @@ import type {
   DriverRegisterRequest,
   LoginRes,
   LoginT,
+  LogoutRes,
   UpdatePasswordRequest,
 } from "./driver_types";
 import { useNavigate } from "react-router";
@@ -34,9 +35,9 @@ const useLoginDriver = () => {
   return useMutation({
     mutationKey: ["driver_login"],
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["verify_driver"] });
+      await queryClient.invalidateQueries({ queryKey: ["verify_driver"] });
       navigate("/driver");
     },
     onError: (err) => {
@@ -115,4 +116,43 @@ function useUpdateDriverPassword() {
     },
   });
 }
-export { useLoginDriver, useRegisterDriver, useUpdateDriverPassword };
+
+const useLogoutDriver = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const logout = async (): Promise<LogoutRes> => {
+    const response = await fetch(`${BACKEND_API}/driver/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const res = await response.json();
+    if (!response.ok) {
+      const errorMessage = res.message || res.error || "logout failed";
+      throw new Error(errorMessage);
+    }
+
+    return res;
+  };
+
+  return useMutation({
+    mutationKey: ["driver_logout"],
+    mutationFn: logout,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      queryClient.setQueryData(["verify_driver"], null);
+      navigate("/driver/login");
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error(err.message);
+    },
+  });
+};
+
+export {
+  useLoginDriver,
+  useRegisterDriver,
+  useUpdateDriverPassword,
+  useLogoutDriver,
+};

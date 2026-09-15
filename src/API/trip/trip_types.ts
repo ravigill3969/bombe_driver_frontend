@@ -60,7 +60,7 @@ export type RiderPickedResT = {
 
 export type TripCompletedReq = {
   trip_id: string;
-  rider_id : string
+  rider_id: string;
 };
 
 export type TripCompletedResT = {
@@ -72,7 +72,7 @@ export interface ActiveTripRiderResponse {
   pickup: Location;
   dropoff: Location;
   rideDetails: RideDetails;
-  driverFare: number; 
+  driverFare: number;
   riderId: string;
   tripId: string;
 }
@@ -82,4 +82,13 @@ export interface CancelTripWithDriverIdRequest {
   rider_id: string;
   trip_id: string;
   reason: string;
+}
+
+export interface DriversTodayEarningsResponse {
+  message: string;
+  isSuccess: boolean;
+  data: {
+    total_earning_today: number;
+    total_trips_today: number;
+  };
 }

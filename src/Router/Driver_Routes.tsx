@@ -14,6 +14,7 @@ import DriverInfo from "@/pages/Driver/DriverInfo";
 import { WebSocketContextProvider } from "@/context/WebsocketContext";
 import ActiveTrip from "@/pages/Driver/DriverActiveTrip";
 import DriverTripContextProvider from "@/context/map/DriverTripContext";
+import TodayIncome from "@/pages/Driver/TodayIncome";
 
 function ProtectedDriverRoutes() {
   const { isVerified, isPending } = useDriverInfoContext();
@@ -23,7 +24,7 @@ function ProtectedDriverRoutes() {
   }
 
   if (!isVerified) {
-    return <Navigate to="/driver/login" replace />;
+    return <Navigate to="/driver/login" />;
   }
 
   return <Outlet />;
@@ -59,6 +60,7 @@ export function DriverRoutes() {
             }
           />
           <Route path="driverinfo" element={<DriverInfo />} />
+          <Route path="/today-income" element={<TodayIncome />} />
         </Route>
         <Route path="register" element={<DriverRegister />} />
         <Route path="login" element={<DriverLogIn />} />

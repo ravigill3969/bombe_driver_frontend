@@ -70,10 +70,10 @@ function DriverInfo() {
       return;
     }
 
-    // if (newPassword.length < 8) {
-    //   setPasswordError("New password must be at least 8 characters long.");
-    //   return;
-    // }
+    if (newPassword.length < 8) {
+      setPasswordError("New password must be at least 8 characters long.");
+      return;
+    }
 
     if (newPassword === currentPassword) {
       setPasswordError(
@@ -81,7 +81,7 @@ function DriverInfo() {
       );
       return;
     }
-
+    
     if (!confirmNewPassword.trim()) {
       setPasswordError("Please confirm your new password.");
       return;

@@ -1,6 +1,7 @@
 import { useWebSocket } from "@/context/WebsocketContext";
 import { Button } from "../ui/button";
 import TripDetails from "./TripDetails";
+import { Link } from "react-router";
 
 function DriveLiveButton() {
   const {
@@ -33,6 +34,15 @@ function DriveLiveButton() {
               Go offline
             </Button>
           </div>
+
+          <Link to={"/driver/today-income"}>
+            <Button
+              className="w-full h-16 font-bold text-xl"
+              onClick={() => GoLiveOrOffline(true)}
+            >
+              Today's earnings
+            </Button>
+          </Link>
 
           <div>
             <TripDetails />

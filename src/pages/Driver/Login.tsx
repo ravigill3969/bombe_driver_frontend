@@ -109,12 +109,12 @@ function DriverLogIn() {
             >
               Login
             </Button>
-            <Button
+            {/*<Button
               variant="outline"
               className="w-full border-zinc-300 bg-white text-zinc-800 hover:bg-zinc-100/80 h-11 rounded-xl font-medium transition-all active:scale-[0.99] cursor-pointer"
             >
               Login with Google
-            </Button>
+            </Button>*/}
           </CardFooter>
         </Card>
       </div>

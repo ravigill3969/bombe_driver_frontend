@@ -39,3 +39,9 @@ export type UpdatePasswordRequest = {
   new_password: string;
   confirm_new_password: string;
 };
+
+
+export type LogoutRes = {
+  isSuccess: boolean;
+  message: string;
+};

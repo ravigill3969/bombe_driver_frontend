@@ -7,7 +7,7 @@ import { useAssignTripToDriver } from "@/API/trip/trip_apis";
 
 function TripDetails() {
   const {
-    driver: { tripDataOfferRequestForDriver },
+    driver: { tripDataOfferRequestForDriver, setTripDataOfferRequestForDriver },
   } = useWebSocket();
 
   const { mutate } = useAssignTripToDriver();
@@ -25,6 +25,7 @@ function TripDetails() {
   const fare = (ride.driver_fare / 100).toFixed(2);
 
   return (
+    
     <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
       <Card className="overflow-hidden rounded-2xl border shadow-xl">
         {/* Header */}
@@ -115,7 +116,11 @@ function TripDetails() {
 
           {/* Buttons */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="h-11 rounded-xl">
+            <Button
+              variant="outline"
+              className="h-11 rounded-xl"
+              onClick={() => setTripDataOfferRequestForDriver(null)}
+            >
               Decline
             </Button>
 

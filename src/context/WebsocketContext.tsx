@@ -15,6 +15,9 @@ interface DriverI {
   isDriverOnline: boolean;
   setUserId: (val: string) => void;
   tripDataOfferRequestForDriver: TripDataOfferRequestToDriverT | null;
+  setTripDataOfferRequestForDriver: (
+    val: TripDataOfferRequestToDriverT | null,
+  ) => void;
 }
 
 interface RiderI {
@@ -132,22 +135,34 @@ export function WebSocketContextProvider({
           lat: info.latitude,
           lng: info.longitude,
         });
+        
       }
+
+      // A trip ended (either side cancelled or completed it). Clear both the
+      // rider and driver caches so neither side keeps rendering the finished
+      // trip, and drop the last known driver location from the rider map.
+      const clearActiveTrip = () => {
+        setDriverLocationForRider(null);
+        queryClient.setQueryData(["getActiveTripWithRiderId"], null);
+        queryClient.setQueryData(["getActiveTripWithDriverId"], null);
+        queryClient.invalidateQueries({
+          queryKey: ["getActiveTripWithRiderId"],
+        });
+        queryClient.invalidateQueries({
+          queryKey: ["getActiveTripWithDriverId"],
+        });
+      };
 
       if ((data.type as string) == "CANCEL_TRIP") {
         const info: CancelTripDataToUser = data;
         console.log("trip canceld by ", info.driver_or_rider);
-        queryClient.invalidateQueries({
-          queryKey: ["getActiveTripWithRiderId"],
-        });
+        clearActiveTrip();
       }
 
       if ((data.type as string) == "COMPLETE_TRIP") {
         const info: CompleteTripDataToUser = data;
         console.log("trip completed ", info);
-        queryClient.invalidateQueries({
-          queryKey: ["getActiveTripWithRiderId"],
-        });
+        clearActiveTrip();
       }
     };
 
@@ -186,6 +201,7 @@ export function WebSocketContextProvider({
           setIsDriverOnline,
           setUserId,
           tripDataOfferRequestForDriver,
+          setTripDataOfferRequestForDriver,
         },
         rider: {
           setUserId,

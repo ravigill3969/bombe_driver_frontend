@@ -15,6 +15,7 @@ export default function RouterMain() {
         <Routes>
           <Route path="/" element={<Home />} />
 
+
           <Route path="/rider/*" element={<RiderRoutes />} />
           <Route path="/driver/*" element={<DriverRoutes />} />
         </Routes>

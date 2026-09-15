@@ -8,6 +8,11 @@ export type LoginRes = {
   message: string;
 };
 
+export type LogoutRes = {
+  isSuccess: boolean;
+  message: string;
+};
+
 export interface RiderRegisterRequest {
   firstname: string;
   lastname: string;

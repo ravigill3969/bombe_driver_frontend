@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, type ReactNode } from "react";
 import { MapboxProvider, useMapboxContext } from "@/context/map/MapboxContext";
 import { useWebSocket } from "../WebsocketContext";
 import { useDriverInfoContext } from "../DriverInfoContext";
@@ -55,6 +55,14 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
   // exists, so derive that from the data instead of relying on `isSuccess`.
   const hasActiveTrip = tripData != null;
 
+  // `sendData` is recreated on every render of the websocket provider, so keep
+  // it in a ref — referencing it directly would reset the interval below on
+  // every render and it might never fire.
+  const sendDataRef = useRef(sendData);
+  useEffect(() => {
+    sendDataRef.current = sendData;
+  }, [sendData]);
+
   useEffect(() => {
     if (!isPending && isVerified && driverInfo?.driverId) {
       setUserId(driverInfo.driverId);
@@ -90,11 +98,11 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
         rider_id: tripData ? tripData.riderId : "",
         status: tripData ? tripData.rideDetails.status : "",
       };
-      sendData(dataToSend);
+      sendDataRef.current(dataToSend);
     }, 5000);
 
     return () => clearInterval(interval);
-  }, [isDriverOnline, currentLocationCoords]);
+  }, [isDriverOnline, currentLocationCoords, tripData, driverInfo?.driverId]);
 
   return (
     <DriverMapContext.Provider

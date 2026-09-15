@@ -2,6 +2,7 @@ import { BACKEND_API } from "@/global/env";
 import type {
   LoginRes,
   LoginT,
+  LogoutRes,
   RiderRegisterRequest,
   UpdatePasswordRequest,
 } from "./rider_types";
@@ -35,9 +36,9 @@ const useLoginRider = () => {
   return useMutation({
     mutationKey: ["rider_login"],
     mutationFn: login,
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success(data.message);
-      queryClient.invalidateQueries({ queryKey: ["validate_user"] });
+      await queryClient.invalidateQueries({ queryKey: ["validate_user"] });
       navigate("/rider");
     },
     onError: (err) => {
@@ -116,4 +117,40 @@ function useUpdateRiderPassword() {
   });
 }
 
-export { useLoginRider, useRegisterRider, useUpdateRiderPassword };
+const useLogoutRider = () => {
+  const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const logout = async (): Promise<LogoutRes> => {
+    const response = await fetch(`${BACKEND_API}/rider/logout`, {
+      method: "POST",
+      credentials: "include",
+    });
+
+    const res = await response.json();
+    if (!response.ok) {
+      const errorMessage = res.message || res.error || "logout failed";
+      throw new Error(errorMessage);
+    }
+
+    return res;
+  };
+
+  return useMutation({
+    mutationKey: ["rider_logout"],
+    mutationFn: logout,
+    onSuccess: (data) => {
+      toast.success(data.message);
+      // Same as useLogoutDriver: setQueryData notifies the active observer so
+      // the cached rider identity clears immediately and the login page stops
+      // bouncing us back to /rider.
+      queryClient.setQueryData(["validate_user"], null);
+      navigate("/rider/login");
+    },
+    onError: (err) => {
+      console.log(err);
+      toast.error(err.message);
+    },
+  });
+};
+
+export { useLoginRider, useRegisterRider, useUpdateRiderPassword, useLogoutRider };
