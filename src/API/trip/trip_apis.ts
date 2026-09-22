@@ -162,9 +162,6 @@ export function useCompletedTrip() {
     mutationFn: completedTrip,
     mutationKey: ["completedTrip"],
     onSuccess: (data) => {
-      // Drop the trip locally right away so the driver map and the websocket
-      // location sender stop referencing the finished trip instead of waiting
-      // for a refetch that races with the navigation below.
       queryClinet.setQueryData(["getActiveTripWithDriverId"], null);
       queryClinet.invalidateQueries({
         queryKey: ["getActiveTripWithDriverId"],

@@ -24,8 +24,17 @@ function TripDetails() {
 
   const fare = (ride.driver_fare / 100).toFixed(2);
 
+  const handleAcceptRequest = () => {
+    {
+      mutate({
+        rider_id: ride.rider_id,
+        trip_id: ride.trip_id,
+      });
+    }
+    setTripDataOfferRequestForDriver(null);
+  };
+
   return (
-    
     <div className="fixed bottom-6 left-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2">
       <Card className="overflow-hidden rounded-2xl border shadow-xl">
         {/* Header */}
@@ -124,15 +133,7 @@ function TripDetails() {
               Decline
             </Button>
 
-            <Button
-              className="h-11 rounded-xl"
-              onClick={() => {
-                mutate({
-                  rider_id: ride.rider_id,
-                  trip_id: ride.trip_id,
-                });
-              }}
-            >
+            <Button className="h-11 rounded-xl" onClick={()=>handleAcceptRequest()}>
               Accept Ride
             </Button>
           </div>

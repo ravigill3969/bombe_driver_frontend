@@ -40,9 +40,6 @@ export function RiderTripContextProvider({
   const { data, isPending } = useGetActiveTripWithRiderId();
   const navigate = useNavigate();
 
-  // The query resolves with `null` when the rider has no active trip (the
-  // backend answers with `{}`), but React Query still reports that as a
-  // successful fetch. Derive trip presence from the data instead.
   const hasActiveTrip = data != null;
 
   useEffect(() => {
@@ -125,7 +122,7 @@ export function RiderTripContextProvider({
 
     if (!driverLocationMarkerRef.current) {
       driverLocationMarkerRef.current = new mapboxgl.Marker({
-        color: "#ef4444",
+        color: "blue",
       })
         .setLngLat(driver_coords)
         .addTo(map);

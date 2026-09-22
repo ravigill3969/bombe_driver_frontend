@@ -43,7 +43,6 @@ export function RiderInfoProvider({ children }: { children: ReactNode }) {
       if (!response.ok) {
         throw new Error(res.error || "Failed to verify rider");
       }
-      console.log(res);
       return res;
     },
     retry: false,

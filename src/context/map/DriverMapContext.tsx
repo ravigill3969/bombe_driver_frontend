@@ -49,15 +49,8 @@ function DriverMapProviderInner({ children }: { children: ReactNode }) {
     data: tripData,
   } = useGetActiveTripWithDriverId();
 
-  // The query resolves with `null` when the driver has no active trip (the
-  // backend answers with `{}`), but React Query still reports that as a
-  // successful fetch. Routing and trip UI care about whether a trip actually
-  // exists, so derive that from the data instead of relying on `isSuccess`.
   const hasActiveTrip = tripData != null;
 
-  // `sendData` is recreated on every render of the websocket provider, so keep
-  // it in a ref — referencing it directly would reset the interval below on
-  // every render and it might never fire.
   const sendDataRef = useRef(sendData);
   useEffect(() => {
     sendDataRef.current = sendData;

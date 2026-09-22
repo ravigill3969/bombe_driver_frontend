@@ -111,6 +111,7 @@ export function WebSocketContextProvider({
     lat: number;
   } | null>(null);
 
+  const statusRef = useRef("free");
   useEffect(() => {
     if (!userId) return;
     const ws = new WebSocket(`${BACKEND_WEBSOCKET_API}/ws?user_id=${userId}`);
@@ -123,24 +124,11 @@ export function WebSocketContextProvider({
     ws.onmessage = (event) => {
       const data = JSON.parse(event.data);
 
-
       if ((data.type as string) == "RIDE_REQUEST_TO_DRIVER") {
         const reqDataForDriver: TripDataOfferRequestToDriverT = data;
         setTripDataOfferRequestForDriver(reqDataForDriver);
       }
 
-      if ((data.type as string) == "ASSIGNED_DRIVER_LOCATION_UPDATE") {
-        const info: AssignedDriverLocationUpdate = data;
-        setDriverLocationForRider({
-          lat: info.latitude,
-          lng: info.longitude,
-        });
-        
-      }
-
-      // A trip ended (either side cancelled or completed it). Clear both the
-      // rider and driver caches so neither side keeps rendering the finished
-      // trip, and drop the last known driver location from the rider map.
       const clearActiveTrip = () => {
         setDriverLocationForRider(null);
         queryClient.setQueryData(["getActiveTripWithRiderId"], null);
@@ -152,6 +140,20 @@ export function WebSocketContextProvider({
           queryKey: ["getActiveTripWithDriverId"],
         });
       };
+
+      if ((data.type as string) == "ASSIGNED_DRIVER_LOCATION_UPDATE") {
+        const info: AssignedDriverLocationUpdate = data;
+
+        if (info.status !== statusRef.current) {
+          statusRef.current = info.status;
+          clearActiveTrip();
+        }
+
+        setDriverLocationForRider({
+          lat: info.latitude,
+          lng: info.longitude,
+        });
+      }
 
       if ((data.type as string) == "CANCEL_TRIP") {
         const info: CancelTripDataToUser = data;
@@ -180,7 +182,7 @@ export function WebSocketContextProvider({
     return () => {
       ws.close();
     };
-  }, [userId]);
+  }, [userId, queryClient]);
 
   const sendData = (data: unknown) => {
     if (socket.current?.readyState !== WebSocket.OPEN) {

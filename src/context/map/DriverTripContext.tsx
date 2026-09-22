@@ -209,7 +209,7 @@ function DriverTripContextProvider({
     };
   }, [map, currentLocationCoords, routeDestination, fetchRoute]);
 
-  // Check driver distance from destination
+  // Check driver distnce from destination
   const isDriverNearPickup = useMemo(() => {
     if (!currentLocationCoords) return false;
     if (tripStatus !== "assigned" || !pickup_coords) return false;

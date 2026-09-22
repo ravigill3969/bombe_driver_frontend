@@ -6,16 +6,17 @@ import { useGetDriversTodayEarnings } from "@/API/trip/trip_apis";
 
 function TodayIncome() {
   const { data } = useGetDriversTodayEarnings();
-  const totalEarningsToday =
-    data?.isSuccess ? data.data.total_earning_today : 0;
-  
-  const totalTripsToday =
-    data?.isSuccess ? data.data.total_trips_today : 0;
- 
+
+  if (!data || !data.isSuccess) {
+    return <div>Error while loading driver trip info</div>;
+  }
+
+  const totalTripsToday = data.data ? data.data.total_trips_today : 0;
+  const totalEarningsToday = data.data ? data.data.total_earning_today : 0;
 
   return (
     <div className="flex min-h-screen flex-col bg-zinc-50">
-      <NavDesktop NavFor="driver" isDriverVerified= {true} />
+      <NavDesktop NavFor="driver" isDriverVerified={true} />
 
       <div className="mx-auto flex w-full max-w-4xl flex-1 flex-col gap-6 px-4 py-8">
         <div>
@@ -55,7 +56,7 @@ function TodayIncome() {
             </CardHeader>
             <CardContent>
               <p className="text-3xl font-bold text-zinc-900">
-                ${totalEarningsToday.toFixed(2)}
+                ${totalEarningsToday}
               </p>
             </CardContent>
           </Card>

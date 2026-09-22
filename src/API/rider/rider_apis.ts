@@ -140,9 +140,6 @@ const useLogoutRider = () => {
     mutationFn: logout,
     onSuccess: (data) => {
       toast.success(data.message);
-      // Same as useLogoutDriver: setQueryData notifies the active observer so
-      // the cached rider identity clears immediately and the login page stops
-      // bouncing us back to /rider.
       queryClient.setQueryData(["validate_user"], null);
       navigate("/rider/login");
     },
